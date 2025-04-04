@@ -4,7 +4,7 @@ import api from '../../services/api';
  
 interface DiagnosticState {
   diagnostics: any[];
-  currentDiagnostic: any | null;
+  currentDiagnostic: any | null; 
   loading: boolean;
   error: string | null;
 }
