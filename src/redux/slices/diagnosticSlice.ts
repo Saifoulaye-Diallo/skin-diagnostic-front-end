@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
-
+ 
 interface DiagnosticState {
   diagnostics: any[];
   currentDiagnostic: any | null;
