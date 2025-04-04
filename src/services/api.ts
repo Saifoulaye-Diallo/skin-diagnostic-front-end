@@ -1,8 +1,7 @@
 import axios from 'axios';
 const baseURL = import.meta.env.VITE_API_URL;
-console.log("✅ Axios baseURL VITE_API_URL :", baseURL);
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: 'https://skin-diagnostic-back-end-production-2b21.up.railway.app/api/',
 });
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
