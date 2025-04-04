@@ -2,7 +2,7 @@ import axios from 'axios';
 const baseURL = 'https://skin-diagnostic-back-end-production-2b21.up.railway.app/api/';
 console.log("base : ",baseURL)
 const api = axios.create({
-  baseURL: baseURL,
+  baseURL: "https://skin-diagnostic-back-end-production-2b21.up.railway.app/api/",
 });
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
