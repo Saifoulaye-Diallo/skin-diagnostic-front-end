@@ -6,6 +6,13 @@ import { login } from '../redux/slices/authSlice';
 import { RootState } from '../redux/store';
 import Alert from '../components/Alert';
 import Loader from '../components/Loader';
+useEffect(() => {
+  console.log('[DEBUG] Component monté : Login');
+
+  return () => {
+    console.log('[DEBUG] Component démonté : Login');
+  };
+}, []);
 
 const Login = () => {
   const dispatch = useDispatch();
