@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
-import jwt_decode from 'jwt-decode';
 
 interface AuthState {
   token: string | null;
@@ -16,15 +15,7 @@ const initialState: AuthState = {
   loading: false,
   error: null,
 };
-function isTokenValid(token: string): boolean {
-  try {
-    const decoded: any = jwt_decode(token);
-    const currentTime = Date.now() / 1000;
-    return decoded.exp > currentTime;
-  } catch {
-    return false;
-  }
-}
+
 
 export const login = createAsyncThunk(
   'auth/login',
@@ -36,15 +27,9 @@ export const login = createAsyncThunk(
     try {
       const response = await api.post('/token/', credentials);
       const { access } = response.data;
-
-      // Vérification (optionnelle) du token
-      if (!isTokenValid(access)) {
-        throw new Error("Token invalide ou expiré");
-      }
-
       localStorage.setItem('token', access);
       toast.success('Connexion réussie 🔓');
-
+     console.log("🔐 REUSSIE :", { credentials });
       return { access };
     } catch (error: any) {
       const message = error?.response?.data?.detail || 'Identifiants invalides ❌';
