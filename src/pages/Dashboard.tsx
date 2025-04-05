@@ -8,6 +8,13 @@ import LogoutButton from '../components/LogoutButton';
 import Alert from '../components/Alert';
 import ImageCard from '../components/ImageCard';
 import Loader from '../components/Loader';
+useEffect(() => {
+  console.log('[DEBUG] Component monté : Dashboard');
+
+  return () => {
+    console.log('[DEBUG] Component démonté : Dashboard');
+  };
+}, []);
 
 const Dashboard = () => {
   const { currentDiagnostic, loading, error } = useSelector(
