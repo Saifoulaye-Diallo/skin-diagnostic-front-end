@@ -24,11 +24,9 @@ export const login = createAsyncThunk(
       const response = await api.post('/token/', credentials);
       const { access } = response.data;
       localStorage.setItem('token', access);
-      console.log("USER");
       toast.success('Connexion réussie');
       return { access };
     } catch (error: any) {
-      console.error('❌ USER ERROR', error);
       const message = error.response?.data?.detail || 'Identifiants invalides';
       throw new Error(message);
     }
