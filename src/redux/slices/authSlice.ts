@@ -28,12 +28,12 @@ export const login = createAsyncThunk(
       const response = await api.post('/token/', credentials);
       const { access } = response.data;
       localStorage.setItem('token', access);
-      toast.success('Connexion réussie 🔓');
+      //toast.success('Connexion réussie 🔓');
      console.log("🔐 REUSSIE :", { credentials });
       return { access };
     } catch (error: any) {
       const message = error?.response?.data?.detail || 'Identifiants invalides ❌';
-      toast.error(message);
+      //toast.error(message);
       return thunkAPI.rejectWithValue(message);
     }
   }
