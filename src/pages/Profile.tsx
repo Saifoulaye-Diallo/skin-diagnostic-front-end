@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Save, Camera, Lock } from 'lucide-react';
+import { ArrowLeft, User, Mail, Save, Lock } from 'lucide-react';
 import { updateProfile, fetchProfile, updatePassword } from '../redux/slices/authSlice';
 import { RootState } from '../redux/store';
 import Alert from '../components/Alert';
@@ -13,9 +13,6 @@ const Profile = () => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
-    firstName: '',
-    lastName: '',
-    avatar: '',
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -39,9 +36,6 @@ const Profile = () => {
       setFormData({
         username: user.username || '',
         email: user.email || '',
-        firstName: user.firstname || '',
-        lastName: user.last_name || '',
-        avatar: user.avatar || '',
       });
     }
   }, [user, mounted]);
@@ -101,19 +95,6 @@ const Profile = () => {
     }
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (mounted) {
-          setFormData(prev => ({ ...prev, avatar: reader.result as string }));
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   if (!mounted) {
     return null;
   }
@@ -134,72 +115,13 @@ const Profile = () => {
 
         <div className="space-y-6">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Informations personnelles</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Informations du compte</h2>
             {loading ? (
               <div className="flex justify-center py-12">
                 <Loader />
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="flex flex-col items-center mb-8">
-                  <div className="relative">
-                    <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-100">
-                      {formData.avatar ? (
-                        <img
-                          src={formData.avatar}
-                          alt="Avatar"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <User className="w-16 h-16 text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <label
-                      htmlFor="avatar-upload"
-                      className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors"
-                    >
-                      <Camera className="w-4 h-4" />
-                      <input
-                        id="avatar-upload"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleAvatarChange}
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                      Prénom
-                    </label>
-                    <input
-                      type="text"
-                      id="firstName"
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      value={formData.firstName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                      Nom
-                    </label>
-                    <input
-                      type="text"
-                      id="lastName"
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      value={formData.lastName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
-                    />
-                  </div>
-                </div>
-
                 <div>
                   <label htmlFor="username" className="block text-sm font-medium text-gray-700 flex items-center gap-2">
                     <User className="w-4 h-4" />
