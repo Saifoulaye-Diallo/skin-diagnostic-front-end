@@ -36,7 +36,9 @@ const Profile = () => {
 
   useEffect(() => {
     if (user && mounted) {
+      console.log(user);
       setFormData({
+        
         username: user.username || '',
         email: user.email || '',
         firstName: user.firstname || '',
