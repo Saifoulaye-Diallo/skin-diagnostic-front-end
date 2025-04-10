@@ -79,7 +79,6 @@ const Dashboard = () => {
                   image={currentDiagnostic.image}
                   diagnosis={currentDiagnostic.diagnosis}
                   date={currentDiagnostic.created_at}
-                  confidence={currentDiagnostic.confidence}
                   patientName={`${currentDiagnostic.firstName} ${currentDiagnostic.lastName}`}
                 />
                
