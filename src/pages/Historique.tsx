@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, BarChart2, Stethoscope, Clock, FileX } from 'lucide-react';
+import { ArrowLeft, Calendar, User, BarChart2, Stethoscope, Clock, FileX, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { fetchDiagnostics } from '../redux/slices/diagnosticSlice';
+import { fetchDiagnostics, deleteDiagnostic } from '../redux/slices/diagnosticSlice';
 import { RootState } from '../redux/store';
 import Loader from '../components/Loader';
 import Alert from '../components/Alert';
@@ -14,6 +14,7 @@ const Historique = () => {
   const { diagnostics, loading, error } = useSelector(
     (state: RootState) => state.diagnostic
   );
+  const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchDiagnostics());
@@ -25,6 +26,15 @@ const Historique = () => {
     } catch (error) {
       console.error('Error formatting date:', error);
       return 'Date invalide';
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (deleteConfirmation === id) {
+      await dispatch(deleteDiagnostic(id));
+      setDeleteConfirmation(null);
+    } else {
+      setDeleteConfirmation(id);
     }
   };
 
@@ -75,12 +85,43 @@ const Historique = () => {
             {diagnostics.map((diagnostic) => (
               <div key={diagnostic.id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
                 <div className="flex flex-col md:flex-row">
-                  <div className="md:w-1/3">
+                  <div className="md:w-1/3 relative group">
                     <img
                       src={diagnostic.image}
                       alt="Lésion"
                       className="w-full h-64 object-cover"
                     />
+                    <button
+                      onClick={() => handleDelete(diagnostic.id)}
+                      className={`absolute top-2 right-2 p-2 rounded-full 
+                        ${deleteConfirmation === diagnostic.id 
+                          ? 'bg-red-600 text-white hover:bg-red-700' 
+                          : 'bg-white/80 text-gray-700 hover:bg-white hover:text-red-600'} 
+                        backdrop-blur-sm transition-all duration-200`}
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                    {deleteConfirmation === diagnostic.id && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
+                        <div className="text-center p-4">
+                          <p className="text-white mb-4">Confirmer la suppression ?</p>
+                          <div className="flex gap-2 justify-center">
+                            <button
+                              onClick={() => handleDelete(diagnostic.id)}
+                              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                            >
+                              Confirmer
+                            </button>
+                            <button
+                              onClick={() => setDeleteConfirmation(null)}
+                              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                            >
+                              Annuler
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -143,5 +184,3 @@ const Historique = () => {
     </div>
   );
 };
-
-export default Historique;
