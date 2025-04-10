@@ -11,6 +11,7 @@ const Register = React.lazy(() => import('./pages/Register'));
 const Login = React.lazy(() => import('./pages/Login'));
 const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Historique = React.lazy(() => import('./pages/Historique'));
+const Profile = React.lazy(() => import('./pages/Profile'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 function App() {
@@ -39,6 +40,14 @@ function App() {
                 element={
                   <PrivateRoute>
                     <Historique />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <Profile />
                   </PrivateRoute>
                 }
               />
