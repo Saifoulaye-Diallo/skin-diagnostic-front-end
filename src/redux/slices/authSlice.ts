@@ -59,16 +59,12 @@ export const register = createAsyncThunk(
 
 export const fetchProfile = createAsyncThunk(
   'auth/fetchProfile',
-  async () => {
+  async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/profile/');
       return response.data;
     } catch (error: any) {
-      let message = 'Erreur lors du chargement du profil';
-      if (error.response?.data?.detail) {
-        message = error.response.data.detail;
-      }
-      throw new Error(message);
+      return rejectWithValue(error.response?.data?.detail || 'Erreur lors du chargement du profil');
     }
   }
 );
@@ -81,26 +77,24 @@ export const updateProfile = createAsyncThunk(
     firstName: string;
     lastName: string;
     avatar?: string;
-  }) => {
+  }, { rejectWithValue }) => {
     try {
       const response = await api.put('/profile/update/', profileData);
-      toast.success('Profil mis à jour avec succès');
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.detail || 'Erreur lors de la mise à jour du profil');
+      return rejectWithValue(error.response?.data?.detail || 'Erreur lors de la mise à jour du profil');
     }
   }
 );
 
 export const updatePassword = createAsyncThunk(
   'auth/updatePassword',
-  async (passwordData: { current_password: string; new_password: string }) => {
+  async (passwordData: { current_password: string; new_password: string }, { rejectWithValue }) => {
     try {
       const response = await api.put('/profile/password/', passwordData);
-      toast.success('Mot de passe mis à jour avec succès');
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.detail || 'Erreur lors de la mise à jour du mot de passe');
+      return rejectWithValue(error.response?.data?.detail || 'Erreur lors de la mise à jour du mot de passe');
     }
   }
 );
@@ -134,7 +128,6 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Identifiants invalides';
-        toast.error(state.error);
       })
       .addCase(register.pending, (state) => {
         state.loading = true;
@@ -147,7 +140,6 @@ const authSlice = createSlice({
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Erreur lors de l'inscription";
-        toast.error(state.error);
       })
       .addCase(fetchProfile.pending, (state) => {
         state.loading = true;
@@ -160,8 +152,7 @@ const authSlice = createSlice({
       })
       .addCase(fetchProfile.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Erreur lors du chargement du profil';
-        toast.error(state.error);
+        state.error = action.payload as string;
       })
       .addCase(updateProfile.pending, (state) => {
         state.loading = true;
@@ -171,11 +162,12 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = action.payload;
         state.error = null;
+        toast.success('Profil mis à jour avec succès');
       })
       .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Erreur lors de la mise à jour du profil';
-        toast.error(state.error);
+        state.error = action.payload as string;
+        toast.error(state.error || 'Erreur lors de la mise à jour du profil');
       })
       .addCase(updatePassword.pending, (state) => {
         state.loading = true;
@@ -184,11 +176,12 @@ const authSlice = createSlice({
       .addCase(updatePassword.fulfilled, (state) => {
         state.loading = false;
         state.error = null;
+        toast.success('Mot de passe mis à jour avec succès');
       })
       .addCase(updatePassword.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Erreur lors de la mise à jour du mot de passe';
-        toast.error(state.error);
+        state.error = action.payload as string;
+        toast.error(state.error || 'Erreur lors de la mise à jour du mot de passe');
       });
   },
 });
