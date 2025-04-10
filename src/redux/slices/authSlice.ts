@@ -42,12 +42,11 @@ export const register = createAsyncThunk(
     } catch (error: any) {
       let message = "Erreur lors de l'inscription";
       if (error.response?.data) {
-        if (error.response.data.username) {
-          message = "Ce nom d'utilisateur est déjà pris";
-        } else if (error.response.data.email) {
-          message = "Cette adresse e-mail est déjà utilisée";
-        } else if (error.response.data.password) {
-          message = "Le mot de passe n'est pas valide";
+        if (typeof error.response.data === 'object') {
+          const errors = Object.entries(error.response.data)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(', ');
+          message = errors;
         } else if (error.response.data.detail) {
           message = error.response.data.detail;
         }
