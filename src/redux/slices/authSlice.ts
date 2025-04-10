@@ -59,8 +59,16 @@ export const register = createAsyncThunk(
 export const fetchProfile = createAsyncThunk(
   'auth/fetchProfile',
   async () => {
-    const response = await api.get('/profile/');
-    return response.data;
+    try {
+      const response = await api.get('/profile/');
+      return response.data;
+    } catch (error: any) {
+      let message = 'Erreur lors du chargement du profil';
+      if (error.response?.data?.detail) {
+        message = error.response.data.detail;
+      }
+      throw new Error(message);
+    }
   }
 );
 
