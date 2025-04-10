@@ -19,46 +19,47 @@ const Profile = () => {
     newPassword: '',
     confirmPassword: '',
   });
-  const [success, setSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState('');
-  const [passwordSuccess, setPasswordSuccess] = useState(false);
-  const [mounted, setMounted] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchProfile());
-    return () => {
-      setMounted(false);
+    const loadProfile = async () => {
+      try {
+        await dispatch(fetchProfile());
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
     };
+    loadProfile();
   }, [dispatch]);
 
   useEffect(() => {
-    if (user && mounted) {
+    if (user) {
       setFormData({
         username: user.username || '',
         email: user.email || '',
       });
     }
-  }, [user, mounted]);
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     try {
-      const result = await dispatch(updateProfile(formData));
-      if (updateProfile.fulfilled.match(result) && mounted) {
-        setSuccess(true);
-        setTimeout(() => {
-          if (mounted) {
-            setSuccess(false);
-          }
-        }, 3000);
-      }
+      setIsSubmitting(true);
+      await dispatch(updateProfile(formData));
     } catch (error) {
       console.error('Update profile error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     setPasswordError('');
 
     if (passwordData.newPassword.length < 8) {
@@ -72,32 +73,23 @@ const Profile = () => {
     }
 
     try {
-      const result = await dispatch(updatePassword({
+      setIsSubmitting(true);
+      await dispatch(updatePassword({
         current_password: passwordData.currentPassword,
         new_password: passwordData.newPassword,
       }));
       
-      if (updatePassword.fulfilled.match(result) && mounted) {
-        setPasswordSuccess(true);
-        setPasswordData({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: '',
-        });
-        setTimeout(() => {
-          if (mounted) {
-            setPasswordSuccess(false);
-          }
-        }, 3000);
-      }
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
     } catch (error) {
       console.error('Password update error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -116,7 +108,7 @@ const Profile = () => {
         <div className="space-y-6">
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">Informations du compte</h2>
-            {loading ? (
+            {loading && !isSubmitting ? (
               <div className="flex justify-center py-12">
                 <Loader />
               </div>
@@ -133,6 +125,7 @@ const Profile = () => {
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     value={formData.username}
                     onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
+                    disabled={isSubmitting}
                   />
                 </div>
 
@@ -147,21 +140,19 @@ const Profile = () => {
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    disabled={isSubmitting}
                   />
                 </div>
 
                 {error && <Alert type="error" message={error} />}
-                {success && (
-                  <Alert type="success" message="Profil mis à jour avec succès" />
-                )}
 
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={isSubmitting}
                     className="flex items-center gap-2 px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {loading ? (
+                    {isSubmitting ? (
                       <Loader />
                     ) : (
                       <>
@@ -190,6 +181,7 @@ const Profile = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -205,6 +197,7 @@ const Profile = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -220,21 +213,19 @@ const Profile = () => {
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  disabled={isSubmitting}
                 />
               </div>
 
               {passwordError && <Alert type="error" message={passwordError} />}
-              {passwordSuccess && (
-                <Alert type="success" message="Mot de passe mis à jour avec succès" />
-              )}
 
               <div className="flex justify-end">
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isSubmitting}
                   className="flex items-center gap-2 px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {loading ? (
+                  {isSubmitting ? (
                     <Loader />
                   ) : (
                     <>
