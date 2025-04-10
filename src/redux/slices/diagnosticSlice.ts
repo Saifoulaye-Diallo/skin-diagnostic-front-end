@@ -24,9 +24,8 @@ export const submitDiagnostic = createAsyncThunk(
     return {
       id: data.id,
       image: data.image_url,
-      diagnosis: data.diagnostic,
-      created_at: data.date,
-      confidence: 0.95,
+      diagnosis: data.diagnostic_result,
+      created_at: data.date_diagnostic,
       firstName: formData.get('firstName'),
       lastName: formData.get('lastName'),
       birthDate: formData.get('birthDate'),
