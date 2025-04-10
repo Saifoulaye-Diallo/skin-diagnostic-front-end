@@ -21,10 +21,10 @@ export const login = createAsyncThunk(
   async (credentials: { username: string; password: string }) => {
     try {
       const response = await api.post('/token/', credentials);
-      const { access } = response.data;
+      const { access, user } = response.data;
       localStorage.setItem('token', access);
       toast.success('Connexion réussie');
-      return { access };
+      return { token: access, user };
     } catch (error: any) {
       const message = error.response?.data?.detail || 'Identifiants invalides';
       throw new Error(message);
@@ -42,11 +42,12 @@ export const register = createAsyncThunk(
     } catch (error: any) {
       let message = "Erreur lors de l'inscription";
       if (error.response?.data) {
-        if (typeof error.response.data === 'object') {
-          const errors = Object.entries(error.response.data)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(', ');
-          message = errors;
+        if (error.response.data.username) {
+          message = "Ce nom d'utilisateur est déjà pris";
+        } else if (error.response.data.email) {
+          message = "Cette adresse e-mail est déjà utilisée";
+        } else if (error.response.data.password) {
+          message = "Le mot de passe n'est pas valide";
         } else if (error.response.data.detail) {
           message = error.response.data.detail;
         }
@@ -86,18 +87,7 @@ export const updateProfile = createAsyncThunk(
       toast.success('Profil mis à jour avec succès');
       return response.data;
     } catch (error: any) {
-      let message = 'Erreur lors de la mise à jour du profil';
-      if (error.response?.data) {
-        if (typeof error.response.data === 'object') {
-          const errors = Object.entries(error.response.data)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(', ');
-          message = errors;
-        } else if (error.response.data.detail) {
-          message = error.response.data.detail;
-        }
-      }
-      throw new Error(message);
+      throw new Error(error.response?.data?.detail || 'Erreur lors de la mise à jour du profil');
     }
   }
 );
@@ -110,18 +100,7 @@ export const updatePassword = createAsyncThunk(
       toast.success('Mot de passe mis à jour avec succès');
       return response.data;
     } catch (error: any) {
-      let message = 'Erreur lors de la mise à jour du mot de passe';
-      if (error.response?.data) {
-        if (typeof error.response.data === 'object') {
-          const errors = Object.entries(error.response.data)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(', ');
-          message = errors;
-        } else if (error.response.data.detail) {
-          message = error.response.data.detail;
-        }
-      }
-      throw new Error(message);
+      throw new Error(error.response?.data?.detail || 'Erreur lors de la mise à jour du mot de passe');
     }
   }
 );
@@ -148,7 +127,8 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.access;
+        state.token = action.payload.token;
+        state.user = action.payload.user;
         state.error = null;
       })
       .addCase(login.rejected, (state, action) => {
