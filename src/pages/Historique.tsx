@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, User, BarChart2, Stethoscope, Clock, FileX, Trash2 } from 'lucide-react';
+import { ArrowLeft, Calendar, User, BarChart2, Stethoscope, Clock, FileX, Trash2, Edit2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { fetchDiagnostics, deleteDiagnostic } from '../redux/slices/diagnosticSlice';
 import { RootState } from '../redux/store';
 import Loader from '../components/Loader';
 import Alert from '../components/Alert';
+import UpdateDiagnosticForm from '../components/UpdateDiagnosticForm';
 
 const Historique = () => {
   const dispatch = useDispatch();
@@ -16,6 +17,7 @@ const Historique = () => {
   );
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [editingDiagnostic, setEditingDiagnostic] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,6 +53,14 @@ const Historique = () => {
 
   const handleCancelDelete = useCallback(() => {
     setDeleteConfirmation(null);
+  }, []);
+
+  const handleEdit = useCallback((id: string) => {
+    setEditingDiagnostic(id);
+  }, []);
+
+  const handleUpdateSuccess = useCallback(() => {
+    setEditingDiagnostic(null);
   }, []);
 
   return (
@@ -106,18 +116,26 @@ const Historique = () => {
                       alt="Lésion"
                       className="w-full h-64 object-cover"
                     />
-                    <button
-                      onClick={() => handleDelete(diagnostic.id)}
-                      disabled={isDeleting}
-                      className={`absolute top-2 right-2 p-2 rounded-full 
-                        ${deleteConfirmation === diagnostic.id 
-                          ? 'bg-red-600 text-white hover:bg-red-700' 
-                          : 'bg-white/80 text-gray-700 hover:bg-white hover:text-red-600'} 
-                        backdrop-blur-sm transition-all duration-200
-                        disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                    <div className="absolute top-2 right-2 flex gap-2">
+                      <button
+                        onClick={() => handleEdit(diagnostic.id)}
+                        className="p-2 rounded-full bg-white/80 text-gray-700 hover:bg-white hover:text-blue-600 backdrop-blur-sm transition-all duration-200"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(diagnostic.id)}
+                        disabled={isDeleting}
+                        className={`p-2 rounded-full 
+                          ${deleteConfirmation === diagnostic.id 
+                            ? 'bg-red-600 text-white hover:bg-red-700' 
+                            : 'bg-white/80 text-gray-700 hover:bg-white hover:text-red-600'} 
+                          backdrop-blur-sm transition-all duration-200
+                          disabled:opacity-50 disabled:cursor-not-allowed`}
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                     {deleteConfirmation === diagnostic.id && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
                         <div className="text-center p-4">
@@ -143,56 +161,64 @@ const Historique = () => {
                     )}
                   </div>
                   <div className="flex-1 p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <div className="flex items-center gap-2 mb-4">
-                          <User className="w-5 h-5 text-blue-600" />
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {diagnostic.firstName} {diagnostic.lastName}
-                          </h3>
-                        </div>
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Calendar className="w-4 h-4" />
-                            <span>Date de naissance : {diagnostic.birthDate}</span>
+                    {editingDiagnostic === diagnostic.id ? (
+                      <UpdateDiagnosticForm
+                        diagnostic={diagnostic}
+                        onSuccess={handleUpdateSuccess}
+                        onCancel={() => setEditingDiagnostic(null)}
+                      />
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <div className="flex items-center gap-2 mb-4">
+                            <User className="w-5 h-5 text-blue-600" />
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {diagnostic.firstName} {diagnostic.lastName}
+                            </h3>
                           </div>
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Clock className="w-4 h-4" />
-                            <span>Date du diagnostic : {formatDate(diagnostic.created_at)}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-4">
-                          <Stethoscope className="w-5 h-5 text-blue-600" />
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            Résultat du diagnostic
-                          </h3>
-                        </div>
-                        <div className="space-y-3">
-                          <p className="text-gray-800">
-                            <span className="font-medium">Diagnostic :</span> {diagnostic.diagnosis}
-                          </p>
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                              <BarChart2 className="w-4 h-4 text-blue-600" />
-                              <span className="text-gray-600">Niveau de confiance</span>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <Calendar className="w-4 h-4" />
+                              <span>Date de naissance : {diagnostic.birthDate}</span>
                             </div>
-                            <div className="flex-1 flex items-center gap-2">
-                              <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                <div
-                                  className="bg-blue-600 h-2 rounded-full"
-                                  style={{ width: `${(diagnostic.confidence * 100).toFixed(1)}%` }}
-                                />
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <Clock className="w-4 h-4" />
+                              <span>Date du diagnostic : {formatDate(diagnostic.created_at)}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-4">
+                            <Stethoscope className="w-5 h-5 text-blue-600" />
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              Résultat du diagnostic
+                            </h3>
+                          </div>
+                          <div className="space-y-3">
+                            <p className="text-gray-800">
+                              <span className="font-medium">Diagnostic :</span> {diagnostic.diagnosis}
+                            </p>
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-2">
+                                <BarChart2 className="w-4 h-4 text-blue-600" />
+                                <span className="text-gray-600">Niveau de confiance</span>
                               </div>
-                              <span className="text-sm text-gray-600">
-                                {(diagnostic.confidence * 100).toFixed(1)}%
-                              </span>
+                              <div className="flex-1 flex items-center gap-2">
+                                <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                  <div
+                                    className="bg-blue-600 h-2 rounded-full"
+                                    style={{ width: `${(diagnostic.confidence * 100).toFixed(1)}%` }}
+                                  />
+                                </div>
+                                <span className="text-sm text-gray-600">
+                                  {(diagnostic.confidence * 100).toFixed(1)}%
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>

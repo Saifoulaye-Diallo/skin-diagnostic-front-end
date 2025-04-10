@@ -26,11 +26,19 @@ export const submitDiagnostic = createAsyncThunk(
       image: data.image_url,
       diagnosis: data.diagnostic,
       created_at: data.date,
-      confidence: 0.95, // Default confidence since it's not in the response
+      confidence: 0.95,
       firstName: formData.get('firstName'),
       lastName: formData.get('lastName'),
       birthDate: formData.get('birthDate'),
     };
+  }
+);
+
+export const updateDiagnostic = createAsyncThunk(
+  'diagnostic/update',
+  async (data: { id: string; firstName: string; lastName: string; birthDate: string }) => {
+    const response = await api.put(`/diagnostic/update/${data.id}`, data);
+    return response.data;
   }
 );
 
@@ -55,7 +63,7 @@ export const fetchDiagnostics = createAsyncThunk(
         firstName: item.prenom,
         lastName: item.nom,
         birthDate: item.date_naissance,
-        confidence: 0.95, // Default confidence since it's not in the response
+        confidence: 0.95,
       }));
     } catch (error) {
       console.error('Error fetching diagnostics:', error);
@@ -122,6 +130,23 @@ const diagnosticSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Une erreur est survenue lors de la suppression du diagnostic';
         toast.error('Échec de la suppression du diagnostic');
+      })
+      .addCase(updateDiagnostic.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateDiagnostic.fulfilled, (state, action) => {
+        state.loading = false;
+        state.diagnostics = state.diagnostics.map(diagnostic =>
+          diagnostic.id === action.payload.id ? { ...diagnostic, ...action.payload } : diagnostic
+        );
+        state.error = null;
+        toast.success('Diagnostic mis à jour avec succès');
+      })
+      .addCase(updateDiagnostic.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Une erreur est survenue lors de la mise à jour du diagnostic';
+        toast.error('Échec de la mise à jour du diagnostic');
       });
   },
 });
