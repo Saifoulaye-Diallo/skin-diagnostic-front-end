@@ -37,7 +37,7 @@ export const submitDiagnostic = createAsyncThunk(
 export const updateDiagnostic = createAsyncThunk(
   'diagnostic/update',
   async (data: { id: string; firstName: string; lastName: string; birthDate: string }) => {
-    const response = await api.put(`/diagnostic/update/${data.id}`, data);
+    const response = await api.put(`/diagnostic/update/${data.id}/`, data);
     return response.data;
   }
 );
@@ -45,7 +45,7 @@ export const updateDiagnostic = createAsyncThunk(
 export const deleteDiagnostic = createAsyncThunk(
   'diagnostic/delete',
   async (id: string) => {
-    await api.delete(`/diagnostic/delete/${id}`);
+    await api.delete(`/diagnostic/delete/${id}/`);
     return id;
   }
 );
