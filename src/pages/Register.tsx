@@ -40,9 +40,13 @@ const Register = () => {
     }
 
     const { confirmPassword, ...registerData } = formData;
-    const result = await dispatch(register(registerData));
-    if (register.fulfilled.match(result)) {
-      navigate('/login');
+    try {
+      const result = await dispatch(register(registerData));
+      if (register.fulfilled.match(result)) {
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
     }
   };
 
@@ -67,19 +71,19 @@ const Register = () => {
             </h2>
           </div>
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 flex items-center gap-2">
                 <User className="w-4 h-4" />
                 Nom d'utilisateur
               </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="mt-1">
                 <input
                   id="username"
                   type="text"
                   required
                   placeholder="Choisissez un nom d'utilisateur"
-                  className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                 />
@@ -91,13 +95,13 @@ const Register = () => {
                 <Mail className="w-4 h-4" />
                 Adresse e-mail
               </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="mt-1">
                 <input
                   id="email"
                   type="email"
                   required
                   placeholder="Entrez votre adresse e-mail"
-                  className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
@@ -109,13 +113,13 @@ const Register = () => {
                 <Lock className="w-4 h-4" />
                 Mot de passe
               </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="mt-1">
                 <input
                   id="password"
                   type="password"
                   required
                   placeholder="Créez un mot de passe sécurisé"
-                  className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
@@ -127,13 +131,13 @@ const Register = () => {
                 <Lock className="w-4 h-4" />
                 Confirmer le mot de passe
               </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
+              <div className="mt-1">
                 <input
                   id="confirmPassword"
                   type="password"
                   required
                   placeholder="Confirmez votre mot de passe"
-                  className="block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 />
@@ -144,20 +148,22 @@ const Register = () => {
               <Alert type="error" message={passwordError || error} />
             )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-transparent rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <Loader />
-              ) : (
-                <>
-                  S'inscrire
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? (
+                  <Loader />
+                ) : (
+                  <>
+                    <span>S'inscrire</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
           </form>
         </div>
       </div>
