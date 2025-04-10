@@ -62,7 +62,6 @@ export const fetchProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/profile/');
-      console.log("REPONSE : ",response.data);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.detail || 'Erreur lors du chargement du profil');
@@ -72,13 +71,7 @@ export const fetchProfile = createAsyncThunk(
 
 export const updateProfile = createAsyncThunk(
   'auth/updateProfile',
-  async (profileData: {
-    username: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    avatar?: string;
-  }, { rejectWithValue }) => {
+  async (profileData: { username: string; email: string }, { rejectWithValue }) => {
     try {
       const response = await api.put('/profile/update/', profileData);
       return response.data;
