@@ -62,6 +62,7 @@ export const fetchProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/profile/');
+      console.log(response.data);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.detail || 'Erreur lors du chargement du profil');
