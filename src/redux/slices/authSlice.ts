@@ -56,6 +56,68 @@ export const register = createAsyncThunk(
   }
 );
 
+export const fetchProfile = createAsyncThunk(
+  'auth/fetchProfile',
+  async () => {
+    const response = await api.get('/profile/');
+    return response.data;
+  }
+);
+
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (profileData: {
+    username: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+  }) => {
+    try {
+      const response = await api.put('/profile/update/', profileData);
+      toast.success('Profil mis à jour avec succès');
+      return response.data;
+    } catch (error: any) {
+      let message = 'Erreur lors de la mise à jour du profil';
+      if (error.response?.data) {
+        if (typeof error.response.data === 'object') {
+          const errors = Object.entries(error.response.data)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(', ');
+          message = errors;
+        } else if (error.response.data.detail) {
+          message = error.response.data.detail;
+        }
+      }
+      throw new Error(message);
+    }
+  }
+);
+
+export const updatePassword = createAsyncThunk(
+  'auth/updatePassword',
+  async (passwordData: { current_password: string; new_password: string }) => {
+    try {
+      const response = await api.put('/profile/password/', passwordData);
+      toast.success('Mot de passe mis à jour avec succès');
+      return response.data;
+    } catch (error: any) {
+      let message = 'Erreur lors de la mise à jour du mot de passe';
+      if (error.response?.data) {
+        if (typeof error.response.data === 'object') {
+          const errors = Object.entries(error.response.data)
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(', ');
+          message = errors;
+        } else if (error.response.data.detail) {
+          message = error.response.data.detail;
+        }
+      }
+      throw new Error(message);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -97,6 +159,47 @@ const authSlice = createSlice({
       .addCase(register.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Erreur lors de l'inscription";
+        toast.error(state.error);
+      })
+      .addCase(fetchProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Erreur lors du chargement du profil';
+        toast.error(state.error);
+      })
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.error = null;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Erreur lors de la mise à jour du profil';
+        toast.error(state.error);
+      })
+      .addCase(updatePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updatePassword.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(updatePassword.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Erreur lors de la mise à jour du mot de passe';
         toast.error(state.error);
       });
   },
