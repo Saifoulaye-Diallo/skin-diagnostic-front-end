@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, User, BarChart2, Stethoscope, Clock, FileX, Trash2 } from 'lucide-react';
@@ -15,9 +15,13 @@ const Historique = () => {
     (state: RootState) => state.diagnostic
   );
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchDiagnostics());
+    const fetchData = async () => {
+      await dispatch(fetchDiagnostics());
+    };
+    fetchData();
   }, [dispatch]);
 
   const formatDate = (date: string) => {
@@ -29,14 +33,25 @@ const Historique = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
+    if (isDeleting) return;
+    
     if (deleteConfirmation === id) {
-      await dispatch(deleteDiagnostic(id));
-      setDeleteConfirmation(null);
+      try {
+        setIsDeleting(true);
+        await dispatch(deleteDiagnostic(id));
+        setDeleteConfirmation(null);
+      } finally {
+        setIsDeleting(false);
+      }
     } else {
       setDeleteConfirmation(id);
     }
-  };
+  }, [deleteConfirmation, dispatch, isDeleting]);
+
+  const handleCancelDelete = useCallback(() => {
+    setDeleteConfirmation(null);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -54,7 +69,7 @@ const Historique = () => {
           </h1>
         </div>
 
-        {loading && (
+        {loading && !isDeleting && (
           <div className="flex justify-center py-12">
             <Loader />
           </div>
@@ -93,11 +108,13 @@ const Historique = () => {
                     />
                     <button
                       onClick={() => handleDelete(diagnostic.id)}
+                      disabled={isDeleting}
                       className={`absolute top-2 right-2 p-2 rounded-full 
                         ${deleteConfirmation === diagnostic.id 
                           ? 'bg-red-600 text-white hover:bg-red-700' 
                           : 'bg-white/80 text-gray-700 hover:bg-white hover:text-red-600'} 
-                        backdrop-blur-sm transition-all duration-200`}
+                        backdrop-blur-sm transition-all duration-200
+                        disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -108,13 +125,15 @@ const Historique = () => {
                           <div className="flex gap-2 justify-center">
                             <button
                               onClick={() => handleDelete(diagnostic.id)}
-                              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                              disabled={isDeleting}
+                              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              Confirmer
+                              {isDeleting ? 'Suppression...' : 'Confirmer'}
                             </button>
                             <button
-                              onClick={() => setDeleteConfirmation(null)}
-                              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                              onClick={handleCancelDelete}
+                              disabled={isDeleting}
+                              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               Annuler
                             </button>
@@ -184,3 +203,5 @@ const Historique = () => {
     </div>
   );
 };
+
+export default Historique;
