@@ -4,15 +4,14 @@ import { Link } from 'react-router-dom';
 import { History, FileX } from 'lucide-react';
 import { RootState } from '../redux/store';
 import DiagnosticForm from '../components/DiagnosticForm';
-import LogoutButton from '../components/LogoutButton';
 import Alert from '../components/Alert';
 import ImageCard from '../components/ImageCard';
 import Loader from '../components/Loader';
+import ProfileMenu from '../components/ProfileMenu';
 
 const Dashboard = () => {
   const { currentDiagnostic, loading, error } = useSelector(
     (state: RootState) => state.diagnostic
-    
   );
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -39,7 +38,7 @@ const Dashboard = () => {
                 <History className="w-5 h-5" />
                 <span>Historique</span>
               </Link>
-              <LogoutButton />
+              <ProfileMenu />
             </div>
           </div>
         </div>
@@ -71,17 +70,14 @@ const Dashboard = () => {
                   <Loader />
                   <p className="mt-4 text-gray-600">Analyse en cours...</p>
                 </div>
-               
               ) : currentDiagnostic ? (
-             
-             
                 <ImageCard
                   image={currentDiagnostic.image}
                   diagnosis={currentDiagnostic.diagnosis}
                   date={currentDiagnostic.created_at}
+                  confidence={currentDiagnostic.confidence}
                   patientName={`${currentDiagnostic.firstName} ${currentDiagnostic.lastName}`}
                 />
-               
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                   <FileX className="w-16 h-16 mb-4" />
