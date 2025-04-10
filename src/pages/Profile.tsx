@@ -25,30 +25,38 @@ const Profile = () => {
   const [success, setSuccess] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [mounted, setMounted] = useState(true);
 
   useEffect(() => {
     dispatch(fetchProfile());
+    return () => {
+      setMounted(false);
+    };
   }, [dispatch]);
 
   useEffect(() => {
-    if (user) {
+    if (user && mounted) {
       setFormData({
         username: user.username || '',
         email: user.email || '',
-        firstName: user.first_name || '',
+        firstName: user.firstname || '',
         lastName: user.last_name || '',
         avatar: user.avatar || '',
       });
     }
-  }, [user]);
+  }, [user, mounted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const result = await dispatch(updateProfile(formData));
-      if (updateProfile.fulfilled.match(result)) {
+      if (updateProfile.fulfilled.match(result) && mounted) {
         setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
+        setTimeout(() => {
+          if (mounted) {
+            setSuccess(false);
+          }
+        }, 3000);
       }
     } catch (error) {
       console.error('Update profile error:', error);
@@ -75,14 +83,18 @@ const Profile = () => {
         new_password: passwordData.newPassword,
       }));
       
-      if (updatePassword.fulfilled.match(result)) {
+      if (updatePassword.fulfilled.match(result) && mounted) {
         setPasswordSuccess(true);
         setPasswordData({
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
         });
-        setTimeout(() => setPasswordSuccess(false), 3000);
+        setTimeout(() => {
+          if (mounted) {
+            setPasswordSuccess(false);
+          }
+        }, 3000);
       }
     } catch (error) {
       console.error('Password update error:', error);
@@ -94,11 +106,17 @@ const Profile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({ ...formData, avatar: reader.result as string });
+        if (mounted) {
+          setFormData(prev => ({ ...prev, avatar: reader.result as string }));
+        }
       };
       reader.readAsDataURL(file);
     }
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -164,7 +182,7 @@ const Profile = () => {
                       id="firstName"
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                       value={formData.firstName}
-                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
                     />
                   </div>
 
@@ -177,7 +195,7 @@ const Profile = () => {
                       id="lastName"
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                       value={formData.lastName}
-                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
                     />
                   </div>
                 </div>
@@ -192,7 +210,7 @@ const Profile = () => {
                     id="username"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     value={formData.username}
-                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
                   />
                 </div>
 
@@ -206,7 +224,7 @@ const Profile = () => {
                     id="email"
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   />
                 </div>
 
@@ -249,7 +267,7 @@ const Profile = () => {
                   required
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                   value={passwordData.currentPassword}
-                  onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
                 />
               </div>
 
@@ -264,7 +282,7 @@ const Profile = () => {
                   required
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                   value={passwordData.newPassword}
-                  onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
                 />
               </div>
 
@@ -279,7 +297,7 @@ const Profile = () => {
                   required
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
                   value={passwordData.confirmPassword}
-                  onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                 />
               </div>
 
