@@ -27,10 +27,6 @@ const ProfileMenu = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const displayName = user?.firstName && user?.lastName 
-    ? `${user.firstName} ${user.lastName}`
-    : user?.username || 'Utilisateur';
-
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -38,18 +34,10 @@ const ProfileMenu = () => {
         className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
       >
         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-          {user?.avatar ? (
-            <img
-              src={user.avatar}
-              alt="Profile"
-              className="w-full h-full rounded-full object-cover"
-            />
-          ) : (
-            <User className="w-5 h-5 text-blue-600" />
-          )}
+          <User className="w-5 h-5 text-blue-600" />
         </div>
         <span className="text-sm font-medium text-gray-700">
-          {displayName}
+          {user?.username || 'Utilisateur'}
         </span>
       </button>
 
