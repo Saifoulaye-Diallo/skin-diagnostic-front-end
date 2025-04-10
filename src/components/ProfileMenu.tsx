@@ -1,14 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { User, Settings, LogOut } from 'lucide-react';
 import { RootState } from '../redux/store';
+import { fetchProfile } from '../redux/slices/authSlice';
 import LogoutButton from './LogoutButton';
 
 const ProfileMenu = () => {
+  const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const user = useSelector((state: RootState) => state.auth.user);
+
+  useEffect(() => {
+    dispatch(fetchProfile());
+  }, [dispatch]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -20,6 +26,10 @@ const ProfileMenu = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const displayName = user?.firstName && user?.lastName 
+    ? `${user.firstName} ${user.lastName}`
+    : user?.username || 'Utilisateur';
 
   return (
     <div className="relative" ref={menuRef}>
@@ -39,7 +49,7 @@ const ProfileMenu = () => {
           )}
         </div>
         <span className="text-sm font-medium text-gray-700">
-          {user?.username || 'Utilisateur'}
+          {displayName}
         </span>
       </button>
 
