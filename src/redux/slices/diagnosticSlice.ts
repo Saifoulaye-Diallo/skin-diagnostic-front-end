@@ -24,8 +24,8 @@ export const submitDiagnostic = createAsyncThunk(
     return {
       id: data.id,
       image: data.image_url,
-      diagnosis: data.diagnostic_result,
-      created_at: data.date_diagnostic,
+      diagnosis: data.diagnostic,
+      created_at: data.date,
       confidence: 0.95, // Default confidence since it's not in the response
       firstName: formData.get('firstName'),
       lastName: formData.get('lastName'),
@@ -34,12 +34,19 @@ export const submitDiagnostic = createAsyncThunk(
   }
 );
 
+export const deleteDiagnostic = createAsyncThunk(
+  'diagnostic/delete',
+  async (id: string) => {
+    await api.delete(`/diagnostic/delete/${id}`);
+    return id;
+  }
+);
+
 export const fetchDiagnostics = createAsyncThunk(
   'diagnostic/fetchAll',
   async () => {
     try {
       const response = await api.get('/images/');
-      console.log(response.data)
       return response.data.map((item: any) => ({
         id: item.id,
         image: item.image_url,
@@ -48,7 +55,7 @@ export const fetchDiagnostics = createAsyncThunk(
         firstName: item.prenom,
         lastName: item.nom,
         birthDate: item.date_naissance,
-        confidence: 0.95, 
+        confidence: 0.95, // Default confidence since it's not in the response
       }));
     } catch (error) {
       console.error('Error fetching diagnostics:', error);
@@ -98,6 +105,23 @@ const diagnosticSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Une erreur est survenue lors du chargement des diagnostics';
         toast.error('Échec du chargement des diagnostics');
+      })
+      .addCase(deleteDiagnostic.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteDiagnostic.fulfilled, (state, action) => {
+        state.loading = false;
+        state.diagnostics = state.diagnostics.filter(
+          (diagnostic) => diagnostic.id !== action.payload
+        );
+        state.error = null;
+        toast.success('Diagnostic supprimé avec succès');
+      })
+      .addCase(deleteDiagnostic.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Une erreur est survenue lors de la suppression du diagnostic';
+        toast.error('Échec de la suppression du diagnostic');
       });
   },
 });
