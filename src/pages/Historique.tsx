@@ -198,23 +198,6 @@ const Historique = () => {
                             <p className="text-gray-800">
                               <span className="font-medium">Diagnostic :</span> {diagnostic.diagnosis}
                             </p>
-                            <div className="flex items-center gap-4">
-                              <div className="flex items-center gap-2">
-                                <BarChart2 className="w-4 h-4 text-blue-600" />
-                                <span className="text-gray-600">Niveau de confiance</span>
-                              </div>
-                              <div className="flex-1 flex items-center gap-2">
-                                <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                  <div
-                                    className="bg-blue-600 h-2 rounded-full"
-                                    style={{ width: `${(diagnostic.confidence * 100).toFixed(1)}%` }}
-                                  />
-                                </div>
-                                <span className="text-sm text-gray-600">
-                                  {(diagnostic.confidence * 100).toFixed(1)}%
-                                </span>
-                              </div>
-                            </div>
                           </div>
                         </div>
                       </div>
