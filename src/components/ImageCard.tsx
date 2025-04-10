@@ -7,7 +7,6 @@ interface ImageCardProps {
   image: string;
   diagnosis: string;
   date?: string;
-  confidence: number;
   patientName: string;
 }
 
@@ -15,7 +14,6 @@ const ImageCard: React.FC<ImageCardProps> = ({
   image,
   diagnosis,
   date,
-  confidence,
   patientName,
 }) => {
 
@@ -26,7 +24,7 @@ try {
   console.error('Erreur formatage date :', date, error);
 }
 
-  const confidencePercentage = (confidence * 100).toFixed(1);
+
 
   return (
     <div className="bg-white rounded-lg overflow-hidden">
@@ -51,21 +49,6 @@ try {
           <p className="text-gray-700">
             <span className="font-medium">Diagnostic :</span> {diagnosis}
           </p>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-gray-500">
-              <BarChart className="w-4 h-4" />
-              <span className="text-sm">Confiance</span>d
-            </div>
-            <div className="flex-1 flex items-center gap-2">
-              <div className="flex-1 bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full"
-                  style={{ width: `${confidencePercentage}%` }}
-                />
-              </div>
-              <span className="text-sm text-gray-600">{confidencePercentage}%</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
